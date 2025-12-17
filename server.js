@@ -24,38 +24,32 @@ app.use(session({
   cookie: { 
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
-// View engine setup
+// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 
-// Make Google Maps API key available to all views
+// Globals
 app.use((req, res, next) => {
   res.locals.googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || '';
   next();
 });
 
-// Static files
+// Static
 app.use(express.static(path.join(__dirname, 'public')));
-// Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// API Routes (JSON responses)
-const apiRoutes = require('./src/api/routes');
-app.use('/api', apiRoutes);
+// Routes
+app.use('/api', require('./src/api/routes'));
+app.use('/', require('./src/admin/routes'));
 
-// Admin Routes (EJS SSR)
-const adminRoutes = require('./src/admin/routes');
-app.use('/', adminRoutes);
+// Error middleware
+app.use(require('./src/middleware/error.middleware'));
 
-// Error handling middleware (must be last)
-const errorHandler = require('./src/middleware/error.middleware');
-app.use(errorHandler);
-
-// 404 handler
+// 404
 app.use((req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'Not found' });
@@ -67,21 +61,27 @@ app.use((req, res) => {
   });
 });
 
-// Run startup checks before starting server
+/* =======================
+   START SERVER PROPERLY
+   ======================= */
 
-const knex = require('knex')(require('./knexfile').development);
+async function startServer() {
+  try {
+    const knex = require('knex')(require('./knexfile').development);
 
+    await knex.migrate.latest();
+    console.log('Database migrated successfully.');
 
-await knex.migrate.latest();
-console.log('Database migrated successfully.');
-await runStartupChecks();
-try {
+    await runStartupChecks();
+
     app.listen(PORT, () => {
-        console.log(`\nServer running on http://localhost:${PORT}`);
-        console.log(`API available at http://localhost:${PORT}/api`);
-        console.log(`Admin panel at http://localhost:${PORT}/dashboard\n`);
+      console.log(`Server running on port ${PORT}`);
     });
-} catch (error) {
-  console.error('\nFailed to start server:', error.message);
-  process.exit(1);
+
+  } catch (err) {
+    console.error('Startup failed:', err);
+    process.exit(1);
+  }
 }
+
+startServer();
