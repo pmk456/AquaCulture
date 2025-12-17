@@ -1,0 +1,181 @@
+<%- include('../partials/header', { title: 'Dashboard', currentPage: 'dashboard', user: user }) %>
+
+<div class="space-y-6">
+    <!-- Quick Links -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <a href="/users" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Users</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><%= typeof quickLinks !== 'undefined' ? quickLinks.users : 0 %></p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                </div>
+            </div>
+        </a>
+        <a href="/dealers" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Dealers</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><%= typeof quickLinks !== 'undefined' ? quickLinks.dealers : 0 %></p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-store text-green-600 text-xl"></i>
+                </div>
+            </div>
+        </a>
+        <a href="/visits" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Visits</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><%= typeof quickLinks !== 'undefined' ? quickLinks.visits : 0 %></p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar-check text-purple-600 text-xl"></i>
+                </div>
+            </div>
+        </a>
+        <a href="/map" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Active Reps</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><%= typeof quickLinks !== 'undefined' ? quickLinks.activeReps : 0 %></p>
+                </div>
+                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-map text-red-600 text-xl"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-600">Active Sales Reps</h3>
+                <i class="fas fa-user-check text-blue-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-800"><%= typeof stats !== 'undefined' ? stats.activeReps : 0 %></p>
+            <p class="text-sm text-gray-500 mt-2">Currently active</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-600">Pending Syncs</h3>
+                <i class="fas fa-sync text-yellow-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-800"><%= typeof stats !== 'undefined' ? stats.pendingSyncs : 0 %></p>
+            <p class="text-sm text-gray-500 mt-2">Requires attention</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-600">Visits Today</h3>
+                <i class="fas fa-calendar text-purple-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-800"><%= typeof stats !== 'undefined' ? stats.visitsToday : 0 %></p>
+            <p class="text-sm text-gray-500 mt-2">Last 24 hours</p>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-600">Territories</h3>
+                <i class="fas fa-map-marked-alt text-green-600"></i>
+            </div>
+            <p class="text-3xl font-bold text-gray-800"><%= typeof stats !== 'undefined' ? stats.territoriesCount : 0 %></p>
+            <p class="text-sm text-gray-500 mt-2">Active territories</p>
+        </div>
+    </div>
+
+    <!-- Charts and Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Daily Activity Summary -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Daily Activity</h3>
+                <p class="text-xs text-gray-500"><%= new Date().toLocaleDateString() %></p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-4 border border-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-600">Visits Today</p>
+                    <p class="text-2xl font-bold text-gray-800 mt-1"><%= dailyActivity ? dailyActivity.visits : 0 %></p>
+                    <p class="text-xs text-gray-500 mt-1">All visits started today</p>
+                </div>
+                <div class="p-4 border border-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-600">Sales Completed</p>
+                    <p class="text-2xl font-bold text-green-700 mt-1"><%= dailyActivity ? dailyActivity.completed : 0 %></p>
+                    <p class="text-xs text-gray-500 mt-1">Accepted or marked sale completed</p>
+                </div>
+                <div class="p-4 border border-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-600">On Hold</p>
+                    <p class="text-2xl font-bold text-amber-600 mt-1"><%= dailyActivity ? dailyActivity.onHold : 0 %></p>
+                    <p class="text-xs text-gray-500 mt-1">Awaiting manager review</p>
+                </div>
+                <div class="p-4 border border-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-600">Pending Decisions</p>
+                    <p class="text-2xl font-bold text-blue-700 mt-1"><%= dailyActivity ? dailyActivity.pending : 0 %></p>
+                    <p class="text-xs text-gray-500 mt-1">Submitted, not yet accepted/hold/denied</p>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-500">
+                <p>Denied today: <span class="font-semibold text-red-600"><%= dailyActivity ? dailyActivity.denied : 0 %></span></p>
+            </div>
+        </div>
+
+        <!-- Last 10 Activities -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activities</h3>
+            <div class="space-y-4">
+                <% if (typeof recentActivities !== 'undefined' && recentActivities.length > 0) { %>
+                    <% recentActivities.forEach(activity => { %>
+                        <div class="flex items-start space-x-3 pb-4 border-b border-gray-200">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <% 
+                                    let icon = 'fa-info-circle';
+                                    let iconColor = 'blue';
+                                    if (activity.action === 'create') icon = 'fa-plus';
+                                    else if (activity.action === 'update') icon = 'fa-edit';
+                                    else if (activity.action === 'delete' || activity.action === 'deactivate') { icon = 'fa-trash'; iconColor = 'red'; }
+                                    else if (activity.action === 'login') { icon = 'fa-sign-in-alt'; iconColor = 'green'; }
+                                %>
+                                <i class="fas <%= icon %> text-<%= iconColor %>-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-800"><%= activity.action.charAt(0).toUpperCase() + activity.action.slice(1) %> <%= activity.entity_type %></p>
+                                <p class="text-xs text-gray-500">
+                                    <% if (activity.first_name) { %>
+                                        <%= activity.first_name %> <%= activity.last_name %>
+                                    <% } else { %>
+                                        System
+                                    <% } %>
+                                    • <%= new Date(activity.created_at).toLocaleString() %>
+                                </p>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p class="text-sm text-gray-500 text-center py-4">No recent activities</p>
+                <% } %>
+            </div>
+            <div class="mt-4 text-center">
+                <a href="/audit" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View all activities →</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Placeholder for chart initialization
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('activityChart');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        // Chart.js initialization would go here
+        // Example: new Chart(ctx, { type: 'line', data: {...}, options: {...} });
+    }
+});
+</script>
+
+<%- include('../partials/footer') %>
+

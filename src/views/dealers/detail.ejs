@@ -1,0 +1,165 @@
+<%- include('../partials/header', { title: dealer ? dealer.name : 'Dealer Details', currentPage: 'dealers', user: user }) %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800"><%= dealer.name %></h1>
+                <p class="text-gray-600 mt-1">Dealer ID: <%= dealer.id %></p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="/dealers/<%= dealer.id %>/edit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                    <i class="fas fa-edit mr-2"></i>Edit
+                </a>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-fish text-blue-500"></i>
+                <span class="capitalize"><%= dealer.species %></span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-map-marker-alt text-green-500"></i>
+                <span><%= dealer.territory_name || 'Unassigned' %></span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-ruler-combined text-purple-500"></i>
+                <span><%= dealer.farm_size %> acres</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Contact Information</h3>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600">Phone</p>
+                    <p class="text-gray-800 font-medium"><%= dealer.phone || 'N/A' %></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Email</p>
+                    <p class="text-gray-800 font-medium"><%= dealer.email || 'N/A' %></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Address</p>
+                    <p class="text-gray-800 font-medium"><%= dealer.address %></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Farm Details</h3>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600">Territory</p>
+                    <p class="text-gray-800 font-medium"><%= dealer.territory_name || 'Unassigned' %></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Coordinates</p>
+                    <p class="text-gray-800 font-medium"><%= dealer.latitude %>°, <%= dealer.longitude %>°</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Last Updated</p>
+                    <p class="text-gray-800 font-medium"><%= new Date(dealer.updated_at).toLocaleString() %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Location on Map</h3>
+        <div id="dealer-map" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-200"></div>
+        <p class="mt-2 text-xs text-gray-500">
+            Dealer coordinates: Lat <%= dealer.latitude %>, Lng <%= dealer.longitude %>
+            <% if (territory && territory.name) { %>
+                • Territory: <%= territory.name %>
+            <% } %>
+        </p>
+    </div>
+
+    <!-- Notes -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Notes</h3>
+        <p class="text-gray-700"><%= dealer.notes || 'No notes provided.' %></p>
+    </div>
+
+    <!-- Recent Visits -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">Recent Visits</h3>
+            <a href="/visits?dealer_id=<%= dealer.id %>" class="text-sm text-blue-600 hover:text-blue-800">View all</a>
+        </div>
+        <div class="space-y-3">
+            <% if (recentVisits && recentVisits.length) { %>
+                <% recentVisits.forEach(visit => { %>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <p class="text-sm font-medium text-gray-800">Visit #<%= visit.id %> • <span class="capitalize"><%= visit.visit_type %></span></p>
+                            <p class="text-xs text-gray-500">Rep: <%= visit.rep_first_name %> <%= visit.rep_last_name %> • <%= new Date(visit.start_time).toLocaleString() %></p>
+                        </div>
+                        <a href="/visits/<%= visit.id %>" class="text-blue-600 hover:text-blue-800 text-sm">
+                            View Details →
+                        </a>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="text-sm text-gray-500 text-center py-4">No recent visits logged.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+<script src="/js/map.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dealer = {
+            lat: <%= dealer.latitude || 0 %>,
+            lng: <%= dealer.longitude || 0 %>,
+            name: "<%- dealer.name.replace(/"/g, '\\"') %>",
+            address: "<%- (dealer.address || '').replace(/"/g, '\\"') %>"
+        };
+
+        const territory = <% if (typeof territory !== 'undefined' && territory && territory.polygon_coordinates) { %>
+            <%- JSON.stringify(territory) %>
+        <% } else { %>
+            null
+        <% } %>;
+
+        const map = new TerritoryMap('dealer-map', {
+            enableDrawing: false,
+            existingPolygon: territory ? territory.polygon_coordinates : null
+        });
+
+        // After map is ready, center and add a marker
+        const initInterval = setInterval(() => {
+            if (!map.map) return;
+            clearInterval(initInterval);
+
+            const position = { lat: dealer.lat, lng: dealer.lng };
+            map.map.setCenter(position);
+            map.map.setZoom(12);
+
+            const marker = new google.maps.Marker({
+                position,
+                map: map.map,
+                title: dealer.name
+            });
+
+            const info = new google.maps.InfoWindow({
+                content: `
+                    <div class="p-2">
+                        <h3 class="font-semibold">${dealer.name}</h3>
+                        <p class="text-sm text-gray-600">${dealer.address || ''}</p>
+                    </div>
+                `
+            });
+
+            marker.addListener('click', () => info.open(map.map, marker));
+        }, 200);
+    });
+</script>
+
+<%- include('../partials/footer') %>

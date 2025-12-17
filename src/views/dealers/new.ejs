@@ -1,0 +1,255 @@
+<%- include('../partials/header', { title: 'Add Dealer', currentPage: 'dealers', user: user }) %>
+
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Add New Dealer</h1>
+            <p class="text-gray-600 mt-1">Register a new dealer in the system</p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form class="space-y-6" method="POST" action="/dealers">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Dealer Name *</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    value="<%= formData?.name || '' %>"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone" 
+                        value="<%= formData?.phone || '' %>"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        value="<%= formData?.email || '' %>"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                </div>
+            </div>
+
+            <div>
+                <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                <textarea 
+                    id="address" 
+                    name="address" 
+                    rows="3"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                ><%= formData?.address || '' %></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="latitude" class="block text-sm font-medium text-gray-700 mb-2">Latitude *</label>
+                    <input 
+                        type="number" 
+                        step="any"
+                        id="latitude" 
+                        name="latitude" 
+                        value="<%= formData?.latitude || '' %>"
+                        required
+                        placeholder="Select on map below"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        readonly
+                    >
+                </div>
+                <div>
+                    <label for="longitude" class="block text-sm font-medium text-gray-700 mb-2">Longitude *</label>
+                    <input 
+                        type="number" 
+                        step="any"
+                        id="longitude" 
+                        name="longitude" 
+                        value="<%= formData?.longitude || '' %>"
+                        required
+                        placeholder="Select on map below"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        readonly
+                    >
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="farm_size" class="block text-sm font-medium text-gray-700 mb-2">Farm Size (acres) *</label>
+                    <input 
+                        type="number" 
+                        id="farm_size" 
+                        name="farm_size" 
+                        value="<%= formData?.farm_size || '' %>"
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                </div>
+                <div>
+                    <label for="species" class="block text-sm font-medium text-gray-700 mb-2">Species *</label>
+                    <select 
+                        id="species" 
+                        name="species" 
+                        required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">Select Species</option>
+                        <% const speciesList = ['tilapia','catfish','salmon','trout','other']; %>
+                        <% speciesList.forEach(sp => { %>
+                            <option value="<%= sp %>" <%= formData?.species === sp ? 'selected' : '' %>><%= sp.charAt(0).toUpperCase() + sp.slice(1) %></option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label for="territory" class="block text-sm font-medium text-gray-700 mb-2">Territory *</label>
+                <select 
+                    id="territory" 
+                    name="territory_id" 
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                    <option value="">Select Territory</option>
+                    <% if (territories && territories.length) { %>
+                        <% territories.forEach(t => { %>
+                            <option value="<%= t.id %>" <%= formData?.territory_id == t.id ? 'selected' : '' %>><%= t.name %></option>
+                        <% }) %>
+                    <% } %>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dealer Location on Map</label>
+                <div 
+                    id="dealer-map" 
+                    style="height: 400px; width: 100%; border: 2px solid #e5e7eb; border-radius: 0.5rem;" 
+                    class="mb-2 hidden"
+                ></div>
+                <p class="text-xs text-gray-500 mb-1">
+                    1) Select a territory above to load its boundary. 2) Use the marker or polygon tool on the map to pick the dealer location (inside that territory). Latitude and longitude fields will be filled automatically.
+                </p>
+            </div>
+
+            <div>
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <textarea 
+                    id="notes" 
+                    name="notes" 
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Additional notes about the dealer..."
+                ><%= formData?.notes || '' %></textarea>
+            </div>
+
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
+                <a href="/dealers" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button 
+                    type="submit"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Add Dealer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="/js/map.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const territorySelect = document.getElementById('territory');
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+        const mapContainer = document.getElementById('dealer-map');
+
+        const territories = <%- JSON.stringify(territories || []) %>;
+        let territoryMap = null;
+
+        function updateLatLngFromCoords(coords) {
+            if (!coords || !coords.length) return;
+            const sum = coords.reduce((acc, c) => ({
+                lat: acc.lat + c.lat,
+                lng: acc.lng + c.lng
+            }), { lat: 0, lng: 0 });
+            const centroid = {
+                lat: sum.lat / coords.length,
+                lng: sum.lng / coords.length
+            };
+            latInput.value = centroid.lat.toFixed(6);
+            lngInput.value = centroid.lng.toFixed(6);
+        }
+
+        function ensureMap(territory) {
+            if (!territory || !territory.polygon_coordinates) {
+                mapContainer.classList.add('hidden');
+                return;
+            }
+
+            mapContainer.classList.remove('hidden');
+
+            const mapOptions = {
+                enableDrawing: true,
+                existingPolygon: territory.polygon_coordinates,
+                onPolygonComplete: (coords) => {
+                    updateLatLngFromCoords(coords);
+                },
+                onMarkerComplete: ({ lat, lng }) => {
+                    latInput.value = lat.toFixed(6);
+                    lngInput.value = lng.toFixed(6);
+                }
+            };
+
+            if (!territoryMap) {
+                territoryMap = new TerritoryMap('dealer-map', mapOptions);
+                territoryMap.init();
+            } else {
+                // Clear old polygons and draw the selected territory
+                territoryMap.clearPolygons();
+                const polygon = territoryMap.addTerritoryPolygon(territory);
+                if (polygon) {
+                    territoryMap.fitBounds([{ polygon }]);
+                }
+            }
+        }
+
+        territorySelect.addEventListener('change', () => {
+            const id = parseInt(territorySelect.value, 10);
+            const territory = territories.find(t => t.id === id);
+            ensureMap(territory);
+        });
+
+        // If form has a selected territory (on validation error), initialize map on load
+        <% if (formData?.territory_id) { %>
+            (function() {
+                const id = parseInt('<%= formData.territory_id %>', 10);
+                const territory = territories.find(t => t.id === id);
+                if (territory) {
+                    ensureMap(territory);
+                }
+            })();
+        <% } %>
+    });
+</script>
+
+<%- include('../partials/footer') %>

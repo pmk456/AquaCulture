@@ -1,0 +1,163 @@
+<%- include('../partials/header', { title: 'Edit Territory', currentPage: 'territories', user: user }) %>
+
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Edit Territory</h1>
+            <p class="text-gray-600 mt-1">Update territory information</p>
+        </div>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="mb-4 p-4 rounded border border-red-200 bg-red-50 text-red-700 text-sm">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form class="space-y-6" method="POST" action="/territories/<%= territoryId %>">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Territory Name *</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    value="<%= territory.name %>"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                ><%= territory.description || '' %></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Territory Boundary (Draw on Map)</label>
+                <div class="mb-2 flex gap-2">
+                    <div class="flex-1 relative">
+                        <input 
+                            type="text" 
+                            id="location-search" 
+                            placeholder="Type to search locations (e.g., Bangalore, Mumbai)..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button 
+                        type="button" 
+                        id="search-location-btn"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div id="territory-map" style="height: 400px; width: 100%; border: 2px solid #e5e7eb; border-radius: 0.5rem;" class="mb-2"></div>
+                <p class="text-xs text-gray-500 mb-2">Click the polygon tool above the map to draw or edit your territory boundary. You can edit the polygon by dragging the points.</p>
+                <input 
+                    type="hidden" 
+                    id="polygon_coordinates" 
+                    name="polygon_coordinates" 
+                    value="<%= territory.polygon_coordinates ? JSON.stringify(territory.polygon_coordinates) : '' %>"
+                >
+                <textarea 
+                    id="polygon_display" 
+                    rows="3"
+                    readonly
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-xs font-mono"
+                    placeholder="Polygon coordinates will appear here..."
+                ></textarea>
+                <p class="text-xs text-gray-500 mt-1">Polygon coordinates (auto-generated from map)</p>
+            </div>
+
+            <div>
+                <label class="flex items-center">
+                    <input type="checkbox" name="is_active" value="true" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" <%= territory.is_active ? 'checked' : '' %>>
+                    <span class="ml-2 text-sm text-gray-700">Active Territory</span>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
+                <a href="/territories" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button 
+                    type="submit"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    Update Territory
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/js/map.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const existingPolygon = <% if (territory.polygon_coordinates) { %>
+        <%= JSON.stringify(territory.polygon_coordinates) %>
+    <% } else { %>
+        null
+    <% } %>;
+
+    const map = new TerritoryMap('territory-map', {
+        enableDrawing: true,
+        existingPolygon: existingPolygon,
+        onPolygonComplete: (coordinates) => {
+            const input = document.getElementById('polygon_coordinates');
+            const display = document.getElementById('polygon_display');
+            const json = JSON.stringify(coordinates, null, 2);
+            input.value = json;
+            display.value = json;
+        }
+    });
+    map.init();
+
+    // Location search functionality (fallback if autocomplete doesn't work)
+    const searchInput = document.getElementById('location-search');
+    const searchBtn = document.getElementById('search-location-btn');
+    
+    const performSearch = () => {
+        const query = searchInput.value.trim();
+        if (!query) return;
+        
+        // If autocomplete handled it, don't do manual search
+        if (map.autocomplete) {
+            return;
+        }
+        
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+        
+        map.searchLocation(query).then(() => {
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+        }).catch((error) => {
+            alert('Location not found. Please try a different search term.');
+            console.error('Search error:', error);
+            searchBtn.disabled = false;
+            searchBtn.innerHTML = '<i class="fas fa-search"></i> Search';
+        });
+    };
+    
+    // Wait for map to initialize before setting up search
+    setTimeout(() => {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+        });
+        
+        searchBtn.addEventListener('click', performSearch);
+    }, 1000);
+});
+</script>
+
+<%- include('../partials/footer') %>
+

@@ -1,0 +1,249 @@
+<%- include('../partials/header', { title: 'Live Map', currentPage: 'map', user: user }) %>
+
+<div class="space-y-6">
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Territory</label>
+                <select id="territoryFilter" name="territory_id" form="filterForm" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">All Territories</option>
+                    <% if (typeof territories !== 'undefined' && territories.length > 0) { %>
+                        <% territories.forEach(t => { %>
+                            <option value="<%= t.id %>" <%= req.query && req.query.territory_id == t.id ? 'selected' : '' %>>
+                                <%= t.name %>
+                            </option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Rep</label>
+                <select id="repFilter" name="rep_id" form="filterForm" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">All Reps</option>
+                    <% if (typeof reps !== 'undefined' && reps.length > 0) { %>
+                        <% reps.forEach(r => { %>
+                            <option value="<%= r.id %>" <%= req.query && req.query.rep_id == r.id ? 'selected' : '' %>>
+                                <%= r.first_name %> <%= r.last_name %>
+                            </option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                <input 
+                    type="date" 
+                    id="dateFilter"
+                    name="date"
+                    form="filterForm"
+                    value="<%= req.query && req.query.date ? req.query.date : '' %>"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+            </div>
+            <div class="flex items-end">
+                <form id="filterForm" method="GET" action="/map" class="w-full">
+                    <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-filter mr-2"></i>Apply Filters
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Map -->
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Live Map - Territories & Rep Locations</h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-600">
+                            <span class="inline-block w-3 h-3 bg-blue-500 rounded mr-1"></span> Territories
+                        </span>
+                        <span class="text-xs text-gray-600">
+                            <span class="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span> Reps
+                        </span>
+                    </div>
+                </div>
+                <div id="live-map" style="height: 600px; width: 100%; border: 2px solid #e5e7eb; border-radius: 0.5rem;"></div>
+            </div>
+        </div>
+
+        <!-- Rep Cards Sidebar -->
+        <div class="space-y-4">
+            <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+                <% locations.forEach(loc => { %>
+                    <div class="bg-white rounded-lg shadow p-4 rep-card">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <% 
+                                    const initials = (loc.first_name ? loc.first_name.charAt(0) : '') + (loc.last_name ? loc.last_name.charAt(0) : '');
+                                    const colors = ['blue', 'green', 'purple', 'red', 'yellow'];
+                                    const colorIndex = loc.user_id ? loc.user_id % colors.length : 0;
+                                %>
+                                <div class="w-10 h-10 bg-<%= colors[colorIndex] %>-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                                    <%= initials || 'U' %>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">
+                                        <%= loc.first_name && loc.last_name ? `${loc.first_name} ${loc.last_name}` : 'Unknown' %>
+                                    </p>
+                                    <p class="text-xs text-gray-500"><%= loc.role || 'User' %></p>
+                                </div>
+                            </div>
+                            <% 
+                                const pingTime = loc.timestamp ? new Date(loc.timestamp) : new Date();
+                                const minutesAgo = Math.floor((Date.now() - pingTime.getTime()) / 60000);
+                                let statusColor = 'green';
+                                if (minutesAgo > 15) statusColor = 'yellow';
+                                if (minutesAgo > 60) statusColor = 'red';
+                            %>
+                            <div class="w-3 h-3 bg-<%= statusColor %>-500 rounded-full"></div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Last Ping</span>
+                                <span class="text-gray-800 font-medium">
+                                    <% if (minutesAgo < 1) { %>Just now<% } else if (minutesAgo < 60) { %><%= minutesAgo %> min ago<% } else { %><%= Math.floor(minutesAgo / 60) %>h ago<% } %>
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Location</span>
+                                <span class="text-gray-800 font-medium">
+                                    <%= loc.latitude && loc.longitude ? `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}` : 'N/A' %>
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Territory</span>
+                                <span class="text-gray-800 font-medium"><%= loc.territory_name || 'N/A' %></span>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+                    <i class="fas fa-map-marker-alt text-3xl mb-2"></i>
+                    <p>No location data available</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script src="/js/map.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const territories = <% if (typeof territories !== 'undefined' && territories.length > 0) { %>
+        <%= JSON.stringify(territories.map(t => ({
+            id: t.id,
+            name: t.name,
+            description: t.description,
+            polygon_coordinates: t.polygon_coordinates
+        }))) %>
+    <% } else { %>
+        []
+    <% } %>;
+
+    const locations = <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
+        <%= JSON.stringify(locations.map(loc => ({
+            user_id: loc.user_id,
+            first_name: loc.first_name,
+            last_name: loc.last_name,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            timestamp: loc.timestamp,
+            role: loc.role
+        }))) %>
+    <% } else { %>
+        []
+    <% } %>;
+
+    // Initialize map
+    const map = new TerritoryMap('live-map', {
+        enableDrawing: false,
+        center: locations.length > 0 
+            ? { lat: locations[0].latitude, lng: locations[0].longitude }
+            : { lat: 20.5937, lng: 78.9629 },
+        zoom: locations.length > 0 ? 10 : 6
+    });
+    
+    map.init();
+
+    // Wait for map to initialize, then add territories and markers
+    setTimeout(() => {
+        if (!window.google || !window.google.maps) {
+            console.error('Google Maps not loaded');
+            return;
+        }
+
+        const googleMap = map.map;
+        if (!googleMap) return;
+
+        const colors = ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#9C27B0', '#00BCD4'];
+        const bounds = new google.maps.LatLngBounds();
+
+        // Add territory polygons
+        territories.forEach((territory, index) => {
+            if (territory.polygon_coordinates) {
+                const polygon = map.addTerritoryPolygon(territory, colors[index % colors.length]);
+                if (polygon) {
+                    const path = polygon.getPath();
+                    for (let i = 0; i < path.getLength(); i++) {
+                        bounds.extend(path.getAt(i));
+                    }
+                }
+            }
+        });
+
+        // Add rep location markers
+        locations.forEach((loc, index) => {
+            if (loc.latitude && loc.longitude) {
+                const marker = new google.maps.Marker({
+                    position: { lat: loc.latitude, lng: loc.longitude },
+                    map: googleMap,
+                    title: `${loc.first_name} ${loc.last_name}`,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#EA4335',
+                        fillOpacity: 1,
+                        strokeColor: '#FFFFFF',
+                        strokeWeight: 2
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div class="p-2">
+                            <h3 class="font-semibold">${loc.first_name} ${loc.last_name}</h3>
+                            <p class="text-sm text-gray-600">${loc.role || 'Rep'}</p>
+                            <p class="text-xs text-gray-500">Last seen: ${new Date(loc.timestamp).toLocaleString()}</p>
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(googleMap, marker);
+                });
+
+                bounds.extend({ lat: loc.latitude, lng: loc.longitude });
+            }
+        });
+
+        // Fit map to show all territories and markers
+        if (territories.length > 0 || locations.length > 0) {
+            googleMap.fitBounds(bounds);
+            // Prevent zooming in too much
+            google.maps.event.addListenerOnce(googleMap, 'bounds_changed', () => {
+                if (googleMap.getZoom() > 15) {
+                    googleMap.setZoom(15);
+                }
+            });
+        }
+    }, 2000);
+});
+</script>
+
+<%- include('../partials/footer') %>
+

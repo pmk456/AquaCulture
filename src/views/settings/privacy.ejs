@@ -1,0 +1,68 @@
+<%- include('../partials/header', { title: 'Privacy Policy', currentPage: 'settings', user: user }) %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Privacy Policy Editor</h1>
+            <p class="text-gray-600 mt-1">Edit and manage privacy policy content</p>
+        </div>
+        <a href="/settings" class="text-gray-600 hover:text-gray-800">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Settings
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Privacy Policy Content</label>
+            <textarea 
+                rows="20"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                placeholder="Enter privacy policy content here..."
+            >Privacy Policy
+
+Last Updated: January 15, 2024
+
+1. Introduction
+Welcome to AquaCulture. We are committed to protecting your privacy and ensuring the security of your personal information.
+
+2. Information We Collect
+We collect information that you provide directly to us, including:
+- Name and contact information
+- Account credentials
+- Location data (when tracking is enabled)
+- Visit and activity records
+
+3. How We Use Your Information
+We use the information we collect to:
+- Provide and improve our services
+- Track sales rep locations (when enabled)
+- Manage dealer relationships
+- Generate reports and analytics
+
+4. Data Security
+We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
+
+5. Your Rights
+You have the right to:
+- Access your personal data
+- Request correction of inaccurate data
+- Request deletion of your data
+- Opt-out of location tracking
+
+6. Contact Us
+If you have questions about this Privacy Policy, please contact us at privacy@aquaculture.com.</textarea>
+        </div>
+
+        <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-200">
+            <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                Reset to Default
+            </button>
+            <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Save Privacy Policy
+            </button>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

@@ -1,0 +1,101 @@
+<%- include('../partials/header', { title: 'Tracking Settings', currentPage: 'settings', user: user }) %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Tracking Settings</h1>
+            <p class="text-gray-600 mt-1">Configure location tracking per role and user</p>
+        </div>
+        <a href="/settings" class="text-gray-600 hover:text-gray-800">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Settings
+        </a>
+    </div>
+
+    <!-- Role-based Settings -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Role-based Tracking</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <p class="font-medium text-gray-800">Super Admin</p>
+                    <p class="text-sm text-gray-600">Track location for super admins</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <p class="font-medium text-gray-800">Manager</p>
+                    <p class="text-sm text-gray-600">Track location for managers</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <p class="font-medium text-gray-800">Rep</p>
+                    <p class="text-sm text-gray-600">Track location for sales reps</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- User-specific Settings -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">User-specific Overrides</h3>
+        <div class="space-y-4">
+            <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                <% users.forEach(u => { %>
+                    <% 
+                        const initials = (u.first_name ? u.first_name.charAt(0) : '') + (u.last_name ? u.last_name.charAt(0) : '');
+                        const colors = ['blue', 'green', 'purple', 'red', 'yellow'];
+                        const colorIndex = u.id ? u.id % colors.length : 0;
+                    %>
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-<%= colors[colorIndex] %>-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                                <%= initials || 'U' %>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-800">
+                                    <%= u.first_name && u.last_name ? `${u.first_name} ${u.last_name}` : u.email %>
+                                </p>
+                                <p class="text-sm text-gray-600"><%= u.role || 'User' %></p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" checked class="sr-only peer" name="tracking_<%= u.id %>">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="text-center text-gray-500 py-8">
+                    <p>No users found</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-end space-x-4">
+        <button class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+            Cancel
+        </button>
+        <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Save Settings
+        </button>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

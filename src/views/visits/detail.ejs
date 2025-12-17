@@ -1,0 +1,235 @@
+<%- include('../partials/header', { title: `Visit #${visit?.id || ''}`, currentPage: 'visits', user: user }) %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Visit #<%= visit.id %></h1>
+                <p class="text-gray-600 mt-1">Dealer: <%= visit.dealer_name %></p>
+            </div>
+            <span class="px-3 py-1 text-sm rounded-full <%= visit.visit_type === 'sale' ? 'bg-green-100 text-green-800' : visit.visit_type === 'inspect' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' %> capitalize">
+                <%= visit.visit_type %>
+            </span>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Visit Information</h3>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600">Start Time</p>
+                    <p class="text-gray-800 font-medium"><%= new Date(visit.start_time).toLocaleString() %></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">End Time</p>
+                    <p class="text-gray-800 font-medium"><%= visit.end_time ? new Date(visit.end_time).toLocaleString() : 'In progress' %></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Duration</p>
+                    <% if (visit.start_time && visit.end_time) { 
+                        const durationMs = new Date(visit.end_time) - new Date(visit.start_time);
+                        const mins = Math.round(durationMs / 60000);
+                    %>
+                        <p class="text-gray-800 font-medium"><%= Math.floor(mins / 60) %>h <%= mins % 60 %>m</p>
+                    <% } else { %>
+                        <p class="text-gray-800 font-medium">—</p>
+                    <% } %>
+                </div>
+                <div class="flex items-center gap-2">
+                    <p class="text-sm text-gray-600">Status</p>
+                    <% 
+                        const status = visit.status || 'pending';
+                        const statusColor = status === 'accepted' ? 'green' : status === 'denied' ? 'red' : status === 'hold' ? 'amber' : 'gray';
+                    %>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-<%= statusColor %>-100 text-<%= statusColor %>-700 capitalize">
+                        <%= status %>
+                    </span>
+                    <% if (visit.sale_completed) { %>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            🎉 Sale Completed
+                        </span>
+                    <% } %>
+                    <% if (visit.manager_verified) { %>
+                        <span class="inline-flex items-center text-green-600 text-xs font-semibold">
+                            <i class="fas fa-check-circle mr-1"></i> Manager Verified
+                        </span>
+                    <% } %>
+                </div>
+                <div class="flex items-center gap-3 pt-2">
+                    <button 
+                        id="btn-accept" 
+                        class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                        data-status="accepted"
+                    >Accept</button>
+                    <button 
+                        id="btn-hold" 
+                        class="px-3 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 text-sm"
+                        data-status="hold"
+                    >Hold</button>
+                    <button 
+                        id="btn-deny" 
+                        class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+                        data-status="denied"
+                    >Deny</button>
+                    <span id="status-message" class="text-xs text-gray-500"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Participants</h3>
+            <div class="space-y-3">
+                <div>
+                    <p class="text-sm text-gray-600">Sales Rep</p>
+                    <div class="flex items-center mt-1">
+                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold mr-2">
+                            <%= visit.rep_first_name.charAt(0) %><%= visit.rep_last_name.charAt(0) %>
+                        </div>
+                        <div>
+                            <p class="text-gray-800 font-medium"><%= visit.rep_first_name %> <%= visit.rep_last_name %></p>
+                            <p class="text-xs text-gray-500"><%= visit.rep_role || 'Rep' %></p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Dealer</p>
+                    <div class="mt-1">
+                        <p class="text-gray-800 font-medium"><%= visit.dealer_name %></p>
+                        <p class="text-xs text-gray-500">ID: <%= visit.dealer_id %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map and path -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Route & Territory</h3>
+        <div id="visit-map" style="height: 360px;" class="rounded-lg border border-gray-200"></div>
+        <p class="text-xs text-gray-500 mt-2">
+            Start: <%= visit.start_latitude || '—' %>, <%= visit.start_longitude || '—' %> •
+            End: <%= visit.end_latitude || '—' %>, <%= visit.end_longitude || '—' %>
+            <% if (territory && territory.name) { %> • Territory: <%= territory.name %> <% } %>
+        </p>
+    </div>
+
+    <!-- Photos -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Photos</h3>
+        <% if (visit.photos && visit.photos.length) { %>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <% visit.photos.forEach((photo, idx) => { %>
+                    <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                        <img src="<%= photo %>" alt="Visit photo <%= idx + 1 %>" class="object-cover w-full h-full">
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p class="text-sm text-gray-500">No photos uploaded for this visit.</p>
+        <% } %>
+    </div>
+
+    <!-- Notes -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Notes</h3>
+        <p class="text-gray-700"><%= visit.notes || 'No notes recorded.' %></p>
+    </div>
+</div>
+
+<script src="/js/map.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Status action buttons
+    const btns = document.querySelectorAll('#btn-accept, #btn-hold, #btn-deny');
+    const statusMsg = document.getElementById('status-message');
+    btns.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const status = btn.getAttribute('data-status');
+            statusMsg.textContent = 'Updating...';
+            try {
+                const res = await fetch('/visits/<%= visitId %>/status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+                if (!res.ok) throw new Error('Failed to update status');
+                statusMsg.textContent = 'Updated';
+                setTimeout(() => window.location.reload(), 400);
+            } catch (err) {
+                statusMsg.textContent = 'Error updating status';
+                console.error(err);
+            }
+        });
+    });
+
+    // Map rendering
+    const startLat = <%= visit.start_latitude ? Number(visit.start_latitude) : 'null' %>;
+    const startLng = <%= visit.start_longitude ? Number(visit.start_longitude) : 'null' %>;
+    const endLat = <%= visit.end_latitude ? Number(visit.end_latitude) : 'null' %>;
+    const endLng = <%= visit.end_longitude ? Number(visit.end_longitude) : 'null' %>;
+    const territory = <% if (territory && territory.polygon_coordinates) { %>
+        <%- JSON.stringify(territory) %>
+    <% } else { %>
+        null
+    <% } %>;
+
+    const mapUtil = new TerritoryMap('visit-map', {
+        enableDrawing: false,
+        existingPolygon: territory ? territory.polygon_coordinates : null,
+        zoom: 12
+    });
+    mapUtil.init();
+
+    const waitForMap = setInterval(() => {
+        if (!mapUtil.map) return;
+        clearInterval(waitForMap);
+
+        const markers = [];
+        const path = [];
+
+        if (startLat && startLng) {
+            const pos = { lat: startLat, lng: startLng };
+            markers.push(new google.maps.Marker({
+                position: pos,
+                map: mapUtil.map,
+                label: 'S',
+                title: 'Start'
+            }));
+            path.push(pos);
+        }
+        if (endLat && endLng) {
+            const pos = { lat: endLat, lng: endLng };
+            markers.push(new google.maps.Marker({
+                position: pos,
+                map: mapUtil.map,
+                label: 'E',
+                title: 'End'
+            }));
+            path.push(pos);
+        }
+
+        if (path.length >= 2) {
+            new google.maps.Polyline({
+                path,
+                geodesic: true,
+                strokeColor: '#2563eb',
+                strokeOpacity: 0.9,
+                strokeWeight: 3,
+                map: mapUtil.map
+            });
+        }
+
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach(p => bounds.extend(p));
+        if (!bounds.isEmpty()) {
+            mapUtil.map.fitBounds(bounds);
+        }
+    }, 200);
+});
+</script>
+
+<%- include('../partials/footer') %>
+

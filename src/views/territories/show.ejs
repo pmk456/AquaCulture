@@ -1,0 +1,89 @@
+<%- include('../partials/header', { title: territory.name + ' - Territory', currentPage: 'territories', user: user }) %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800"><%= territory.name %></h1>
+      <p class="text-gray-600 mt-1">Territory details and polygon on map</p>
+    </div>
+    <div class="flex items-center space-x-2">
+      <a href="/territories/<%= territory.id %>/edit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors">
+        Edit Territory
+      </a>
+      <a href="/territories" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+        Back to Territories
+      </a>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white rounded-lg shadow p-4">
+      <h2 class="text-lg font-semibold text-gray-800 mb-3">Territory Map</h2>
+      <div id="territory-map" style="height: 450px; width: 100%;" class="rounded-lg border border-gray-200"></div>
+      <% if (!territory.polygon_coordinates) { %>
+        <p class="mt-3 text-xs text-gray-500">
+          This territory has no polygon saved yet. Edit the territory to draw a boundary on the map.
+        </p>
+      <% } %>
+    </div>
+
+    <div class="space-y-4">
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">Summary</h2>
+        <p class="text-sm text-gray-700 mb-3"><%= territory.description || 'No description provided.' %></p>
+
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm text-gray-600">Status</span>
+          <span class="px-2 py-1 text-xs rounded-full <%= territory.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' %>">
+            <%= territory.is_active ? 'Active' : 'Inactive' %>
+          </span>
+        </div>
+
+        <div class="mt-4 space-y-2 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600">Dealers</span>
+            <span class="font-medium text-gray-800"><%= territory.stats ? territory.stats.dealers : 0 %></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600">Reps</span>
+            <span class="font-medium text-gray-800"><%= territory.stats ? territory.stats.reps : 0 %></span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-gray-600">Visits (30d)</span>
+            <span class="font-medium text-gray-800"><%= territory.stats ? territory.stats.visits_30d : 0 %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-4">
+        <h2 class="text-sm font-semibold text-gray-800 mb-2">Polygon Coordinates (read-only)</h2>
+        <textarea
+          rows="6"
+          readonly
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-xs font-mono text-gray-700"
+        ><%= territory.polygon_coordinates ? JSON.stringify(territory.polygon_coordinates, null, 2) : 'No polygon saved.' %></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/map.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const polygon = <% if (territory.polygon_coordinates) { %>
+      <%- JSON.stringify(territory.polygon_coordinates) %>
+    <% } else { %>
+      null
+    <% } %>;
+
+    const map = new TerritoryMap('territory-map', {
+      enableDrawing: false,
+      existingPolygon: polygon
+    });
+    map.init();
+  });
+</script>
+
+<%- include('../partials/footer') %>
+
+
