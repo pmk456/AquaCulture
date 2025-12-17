@@ -1,8 +1,8 @@
 exports.up = function(knex) {
   return knex.schema.createTable('visits', function(table) {
     table.increments('id').primary();
-    table.integer('dealer_id').references('id').inTable('dealers').onDelete('CASCADE');
-    table.integer('rep_id').references('id').inTable('users').onDelete('CASCADE');
+  table.integer('dealer_id').unsigned().references('id').inTable('dealers').onDelete('CASCADE');
+  table.integer('rep_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
   table.enu('visit_type', ['demo', 'sale', 'inspect']).notNullable();
     table.timestamp('start_time').notNullable();
     table.timestamp('end_time').nullable();

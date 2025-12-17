@@ -11,15 +11,15 @@ async function runStartupChecks() {
     env: false
   };
 
-  console.log('\n🔍 Running startup checks...\n');
+  console.log('\nRunning startup checks...\n');
 
   // 1. Check Database Connection
   try {
     await db.raw('SELECT 1');
     checks.database = true;
-    console.log('✅ Database connection: OK');
+    console.log('Database connection: OK');
   } catch (error) {
-    console.error('❌ Database connection: FAILED');
+    console.error('Database connection: FAILED');
     console.error(`   Error: ${error.message}`);
     console.error('   Make sure MySQL is running and credentials are correct.');
   }
@@ -115,7 +115,7 @@ async function runStartupChecks() {
     process.exit(1);
   }
 
-  console.log('\n🚀 Server ready to start!\n');
+  console.log('\nServer ready to start!\n');
   
   return checks;
 }

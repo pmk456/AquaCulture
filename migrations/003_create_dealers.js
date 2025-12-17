@@ -9,7 +9,7 @@ exports.up = function(knex) {
     table.decimal('longitude', 11, 8).notNullable();
     table.decimal('farm_size', 10, 2).notNullable(); // in acres
     table.string('species').notNullable(); // tilapia, catfish, salmon, etc.
-    table.integer('territory_id').references('id').inTable('territories').onDelete('SET NULL');
+  table.integer('territory_id').unsigned().references('id').inTable('territories').onDelete('SET NULL');
     table.text('notes').nullable();
     table.timestamps(true, true);
     

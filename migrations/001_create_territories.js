@@ -1,6 +1,6 @@
 exports.up = function(knex) {
   return knex.schema.createTable('territories', function(table) {
-    table.increments('id').primary();
+  table.increments('id').primary(); // MySQL: increments is unsigned by default
     table.string('name').notNullable();
     table.text('description').nullable();
     table.json('polygon_coordinates').nullable(); // For future map shape support

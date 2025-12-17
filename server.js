@@ -68,17 +68,23 @@ app.use((req, res) => {
 });
 
 // Run startup checks before starting server
+
+const knex = require('knex')(require('./knexfile').development);
+
 async function startServer() {
   try {
-    await runStartupChecks();
+    // Run DB migrations automatically before starting the server
     
+    await knex.migrate.latest();
+    console.log('Database migrated successfully.');
+    await runStartupChecks();
     app.listen(PORT, () => {
-      console.log(`\n✅ Server running on http://localhost:${PORT}`);
-      console.log(`📡 API available at http://localhost:${PORT}/api`);
-      console.log(`🖥️  Admin panel at http://localhost:${PORT}/dashboard\n`);
+      console.log(`\nServer running on http://localhost:${PORT}`);
+      console.log(`API available at http://localhost:${PORT}/api`);
+      console.log(`Admin panel at http://localhost:${PORT}/dashboard\n`);
     });
   } catch (error) {
-    console.error('\n❌ Failed to start server:', error.message);
+    console.error('\nFailed to start server:', error.message);
     process.exit(1);
   }
 }

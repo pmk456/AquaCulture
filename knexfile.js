@@ -4,12 +4,11 @@ module.exports = {
   development: {
     client: 'mysql2',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 3306,
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: process.env.DB_PORT || 4444,
       user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || 'your_mysql_password',
-      database: process.env.DB_NAME || 'aquaculture_crm',
-      ssl: process.env.DB_SSL === 'true'
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'AQUACULTURE'
     },
     pool: {
       min: 2,

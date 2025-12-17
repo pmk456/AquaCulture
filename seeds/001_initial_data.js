@@ -11,7 +11,7 @@ exports.seed = async function(knex) {
   await knex('territories').del();
 
   // Insert territories
-  const [northTerritory, southTerritory, eastTerritory] = await knex('territories').insert([
+  const territoryIds = await knex('territories').insert([
     {
       name: 'North Region',
       description: 'Northern region covering major aquaculture farms',
@@ -27,12 +27,13 @@ exports.seed = async function(knex) {
       description: 'Eastern coastal region',
       is_active: true
     }
-  ]).returning('*');
+  ]);
+  const [northTerritoryId, southTerritoryId, eastTerritoryId] = territoryIds;
 
   // Insert users
   const passwordHash = await bcrypt.hash('password123', 10);
   
-  const [admin, manager, rep1, rep2] = await knex('users').insert([
+  const userIds = await knex('users').insert([
     {
       first_name: 'Admin',
       last_name: 'User',
@@ -47,7 +48,7 @@ exports.seed = async function(knex) {
       email: 'john.doe@aquaculture.com',
       password_hash: passwordHash,
       role: 'manager',
-      territory_id: northTerritory.id,
+      territory_id: northTerritoryId,
       is_active: true
     },
     {
@@ -56,7 +57,7 @@ exports.seed = async function(knex) {
       email: 'jane.smith@aquaculture.com',
       password_hash: passwordHash,
       role: 'rep',
-      territory_id: southTerritory.id,
+      territory_id: southTerritoryId,
       is_active: true
     },
     {
@@ -65,13 +66,14 @@ exports.seed = async function(knex) {
       email: 'mike.brown@aquaculture.com',
       password_hash: passwordHash,
       role: 'rep',
-      territory_id: eastTerritory.id,
+      territory_id: eastTerritoryId,
       is_active: true
     }
-  ]).returning('*');
+  ]);
+  const [adminId, managerId, rep1Id, rep2Id] = userIds;
 
   // Insert dealers
-  const [dealer1, dealer2, dealer3] = await knex('dealers').insert([
+  const dealerIds = await knex('dealers').insert([
     {
       name: 'ABC Farm',
       phone: '+1 (555) 123-4567',
@@ -81,7 +83,7 @@ exports.seed = async function(knex) {
       longitude: -74.0060,
       farm_size: 25,
       species: 'tilapia',
-      territory_id: northTerritory.id,
+      territory_id: northTerritoryId,
       notes: 'Regular dealer with consistent orders. Prefers morning visits.'
     },
     {
@@ -93,7 +95,7 @@ exports.seed = async function(knex) {
       longitude: -118.2437,
       farm_size: 45,
       species: 'catfish',
-      territory_id: southTerritory.id,
+      territory_id: southTerritoryId,
       notes: 'Large operation, requires regular monitoring.'
     },
     {
@@ -105,16 +107,17 @@ exports.seed = async function(knex) {
       longitude: -95.3698,
       farm_size: 60,
       species: 'salmon',
-      territory_id: eastTerritory.id,
+      territory_id: eastTerritoryId,
       notes: 'Premium quality producer.'
     }
-  ]).returning('*');
+  ]);
+  const [dealer1Id, dealer2Id, dealer3Id] = dealerIds;
 
   // Insert visits
   await knex('visits').insert([
     {
-      dealer_id: dealer1.id,
-      rep_id: manager.id,
+      dealer_id: dealer1Id,
+      rep_id: managerId,
       visit_type: 'demo',
       start_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
       end_time: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 + 75 * 60 * 1000), // 1h 15m later
@@ -126,8 +129,8 @@ exports.seed = async function(knex) {
       is_synced: true
     },
     {
-      dealer_id: dealer2.id,
-      rep_id: rep1.id,
+      dealer_id: dealer2Id,
+      rep_id: rep1Id,
       visit_type: 'sale',
       start_time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
       end_time: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000 + 90 * 60 * 1000), // 1h 30m later

@@ -1,7 +1,7 @@
 exports.up = function(knex) {
   return knex.schema.createTable('sync_queue', function(table) {
     table.increments('id').primary();
-    table.integer('user_id').references('id').inTable('users').onDelete('CASCADE');
+  table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE');
     table.string('entity_type').notNullable(); // visit, dealer, etc.
     table.integer('entity_id').notNullable();
     table.string('operation').notNullable(); // create, update, delete

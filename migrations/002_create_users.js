@@ -6,7 +6,7 @@ exports.up = function(knex) {
     table.string('email').unique().notNullable();
     table.string('password_hash').notNullable();
   table.enu('role', ['super_admin', 'manager', 'rep']).notNullable().defaultTo('rep');
-    table.integer('territory_id').references('id').inTable('territories').onDelete('SET NULL');
+  table.integer('territory_id').unsigned().references('id').inTable('territories').onDelete('SET NULL');
     table.boolean('is_active').defaultTo(true);
     table.timestamp('last_login').nullable();
     table.timestamps(true, true);
