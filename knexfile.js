@@ -4,7 +4,7 @@ module.exports = {
   development: {
     client: 'mysql2',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || '127.0.0.1',
       port: process.env.DB_PORT || 3306,
       user: process.env.DB_USER || 'u651765855_prutto',
       password: process.env.DB_PASSWORD || 'Prutto@123',
@@ -24,7 +24,7 @@ module.exports = {
   production: {
     client: 'mysql2',
     connection: {
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || '127.0.0.1',
       port: process.env.DB_PORT || 3306,
       user: process.env.DB_USER || 'u651765855_prutto',
       password: process.env.DB_PASSWORD || 'Prutto@123',
