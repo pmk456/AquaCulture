@@ -7,7 +7,6 @@ const cors = require('cors');
 const { runStartupChecks } = require('./src/utils/startup-checks');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -74,14 +73,13 @@ async function startServer() {
 
     await runStartupChecks();
 
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-
   } catch (err) {
     console.error('Startup failed:', err);
     process.exit(1);
   }
 }
-
+const PORT = process.env.PORT;
 startServer();
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
