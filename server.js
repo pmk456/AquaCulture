@@ -78,8 +78,9 @@ async function startServer() {
     process.exit(1);
   }
 }
+//startServer().catch(err => console.error('Startup error:', err));
+
 const PORT = process.env.PORT;
-startServer();
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
