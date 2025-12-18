@@ -21,21 +21,7 @@ class TerritoryMap {
   }
 
   init() {
-    const apiKey = document.getElementById('google-maps-api-key')?.getAttribute('data-key') || '';
-    
-    if (!apiKey || apiKey === 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
-      console.error('Google Maps API key not configured');
-      document.getElementById(this.mapContainerId).innerHTML = `
-        <div class="flex items-center justify-center h-full bg-gray-100">
-          <div class="text-center p-8">
-            <i class="fas fa-map-marked-alt text-4xl text-gray-400 mb-4"></i>
-            <p class="text-gray-600">Google Maps API key not configured</p>
-            <p class="text-sm text-gray-500 mt-2">Please add GOOGLE_MAPS_API_KEY to your .env file</p>
-          </div>
-        </div>
-      `;
-      return;
-    }
+    const apiKey = 'AIzaSyCBeMKby4VT9fX_nOX22HlyPHs5wn-6QCg';
 
     // Load Google Maps script if not already loaded
     if (!window.google || !window.google.maps) {

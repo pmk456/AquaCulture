@@ -4,11 +4,11 @@ module.exports = {
   development: {
     client: 'mysql2',
     connection: {
-      host: process.env.DB_HOST || '127.0.0.1',
-      port: process.env.DB_PORT || 4444,
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'AQUACULTURE'
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 3306,
+      user: process.env.DB_USER || 'u651765855_prutto',
+      password: process.env.DB_PASSWORD || 'Prutto@123',
+      database: process.env.DB_NAME || 'u651765855_AQUACULTURE'
     },
     pool: {
       min: 2,
@@ -24,12 +24,11 @@ module.exports = {
   production: {
     client: 'mysql2',
     connection: {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      ssl: process.env.DB_SSL === 'true'
+      host: process.env.DB_HOST || 'localhost',
+      port: process.env.DB_PORT || 3306,
+      user: process.env.DB_USER || 'u651765855_prutto',
+      password: process.env.DB_PASSWORD || 'Prutto@123',
+      database: process.env.DB_NAME || 'u651765855_AQUACULTURE'
     },
     pool: {
       min: 2,

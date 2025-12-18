@@ -7,13 +7,13 @@ const createTransporter = () => {
   }
 
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for others
-    auth: process.env.SMTP_USER
+    secure: process.env.SMTP_SECURE === 'false', // true for 465, false for others
+    auth: process.env.SMTP_USER || 'patanmusthakheem786@gmail.com'
       ? {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
+          user: process.env.SMTP_USER || 'patanmusthakheem786@gmail.com',
+          pass: process.env.SMTP_PASS || 'mnyr hbso kkpo jwnt'
         }
       : undefined
   });
@@ -29,7 +29,7 @@ async function sendMail({ to, subject, html, text }) {
     return;
   }
 
-  const from = process.env.MAIL_FROM || 'no-reply@aquaculture.local';
+  const from = process.env.MAIL_FROM || 'patanmusthakheem786@gmail.com';
 
   await transporter.sendMail({
     from,
