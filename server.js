@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const { runStartupChecks } = require('./src/utils/startup-checks');
-
+const fs = require('fs');
 const app = express();
 
 // Middleware
@@ -74,11 +74,22 @@ async function startServer() {
     await runStartupChecks();
 
   } catch (err) {
-    console.error('Startup failed:', err);
-    process.exit(1);
+
+      const log = `
+        [${new Date().toISOString()}]
+        Startup Error:
+        ${err.stack || err}
+        ${err.stack}
+        ----------------------------------
+        `;
+        fs.appendFileSync(logFile, log, 'utf8');
   }
 }
-//startServer().catch(err => console.error('Startup error:', err));
+
+
+const logFile = path.join(__dirname, 'startuplog.log');
+
+startServer();
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
