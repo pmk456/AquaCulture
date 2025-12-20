@@ -1,10 +1,10 @@
 const nodemailer = require('nodemailer');
 
 const createTransporter = () => {
-  if (!process.env.SMTP_HOST) {
-    console.warn('[mail] SMTP_HOST not configured; email sending is disabled.');
-    return null;
-  }
+  // if (!process.env.SMTP_HOST) {
+  //   console.warn('[mail] SMTP_HOST not configured; email sending is disabled.');
+  //   return null;
+  // }
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',

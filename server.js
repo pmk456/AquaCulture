@@ -33,7 +33,7 @@ app.set('views', path.join(__dirname, 'src/views'));
 
 // Globals
 app.use((req, res, next) => {
-  res.locals.googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || '';
+  res.locals.googleMapsApiKey = 'AIzaSyCBeMKby4VT9fX_nOX22HlyPHs5wn-6QCg';
   next();
 });
 
@@ -59,6 +59,7 @@ app.use((req, res) => {
     user: req.session?.user
   });
 });
+
 
 /* =======================
    START SERVER PROPERLY
