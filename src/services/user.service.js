@@ -28,7 +28,7 @@ const UserService = {
       role: data.role || 'rep',
       territory_id: data.territory_id || null,
       sales_target: data.sales_target ? parseFloat(data.sales_target) : null,
-      is_active: data.is_active !== undefined ? data.is_active : true
+      is_active: 1
     };
 
     const user = await userModel.create(userData);
@@ -113,7 +113,7 @@ const UserService = {
     if (data.sales_target !== undefined) {
       updateData.sales_target = data.sales_target ? parseFloat(data.sales_target) : null;
     }
-    if (data.is_active !== undefined) updateData.is_active = data.is_active;
+    if (data.is_active !== undefined) updateData.is_active = 1; else if (data.is_active === false) updateData.is_active = 0;
 
     const updated = await userModel.update(id, updateData);
     if (updated && updated.password_hash) {
@@ -131,7 +131,7 @@ const UserService = {
   },
 
   async deactivate(id) {
-    return await this.update(id, { is_active: false });
+    return await this.update(id, { is_active: 0 });
   },
 
   async verifyPassword(user, password) {

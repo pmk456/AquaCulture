@@ -2,16 +2,16 @@ const db = require('../config/db');
 
 const SyncModel = {
   async create(data) {
-    const [item] = await db('sync_queue').insert(data).returning('*');
-    return item;
+    const [id] = await db('sync_queue').insert(data);
+    return db('sync_queue').where('id', id).first();
   },
 
   async findById(id) {
-    return await db('sync_queue').where('id', id).first();
+    return db('sync_queue').where('id', id).first();
   },
 
   async findPending(userId) {
-    return await db('sync_queue')
+    return db('sync_queue')
       .where('user_id', userId)
       .where('status', 'pending')
       .orderBy('created_at', 'asc');
@@ -23,33 +23,32 @@ const SyncModel = {
       synced_at: status === 'completed' ? db.fn.now() : null,
       error_message: errorMessage
     };
-    
+
     if (status === 'failed') {
       await db('sync_queue')
         .where('id', id)
         .increment('retry_count', 1);
     }
 
-    const [item] = await db('sync_queue')
+    await db('sync_queue')
       .where('id', id)
-      .update(updateData)
-      .returning('*');
-    return item;
+      .update(updateData);
+
+    return db('sync_queue').where('id', id).first();
   },
 
   async delete(id) {
-    return await db('sync_queue').where('id', id).del();
+    return db('sync_queue').where('id', id).del();
   },
 
   async getPendingCount(userId) {
     const result = await db('sync_queue')
       .where('user_id', userId)
       .where('status', 'pending')
-      .count('* as count')
-      .first();
-    return parseInt(result.count);
+      .count({ count: '*' });
+
+    return Number(result[0].count);
   }
 };
 
 module.exports = SyncModel;
-
