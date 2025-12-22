@@ -12,20 +12,23 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: '*',
   credentials: true
 }));
-
+app.set('trust proxy', 1);
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'aquaculture-secret-key-change-in-production',
+  secret: 'aquaculture-secret-key-change-in-production',
+  name: 'aquaculture.sid',
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     httpOnly: true,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
+
 
 // View engine
 app.set('view engine', 'ejs');
@@ -83,7 +86,9 @@ async function startServer() {
         ${err.stack}
         ----------------------------------
         `;
-        fs.appendFileSync(logFile, log, 'utf8');
+        // clear contents
+        fs.writeFileSync(logFile, '', 'utf8');
+        fs.writeFileSync(logFile, log, 'utf8');
   }
 }
 

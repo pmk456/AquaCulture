@@ -1,9 +1,23 @@
+const fs = require('fs');
+const path = require('path');
 const db = require('../config/db');
+
+const logFile = path.join(__dirname, '../checks.log');
+
+
+// Clear file on every startup
+fs.writeFileSync(logFile, '');
+
+// Simple logger
+function log(message) {
+  fs.appendFileSync(logFile, message + '\n');
+}
 
 /**
  * Run startup validation checks
  */
 async function runStartupChecks() {
+  
   const checks = {
     database: false,
     email: false,
@@ -11,17 +25,17 @@ async function runStartupChecks() {
     env: false
   };
 
-  console.log('\nRunning startup checks...\n');
+  log('\nRunning startup checks...\n');
 
   // 1. Check Database Connection
   try {
     await db.raw('SELECT 1');
     checks.database = true;
-    console.log('Database connection: OK');
+    log('Database connection: OK');
   } catch (error) {
-    console.error('Database connection: FAILED');
-    console.error(`   Error: ${error.message}`);
-    console.error('   Make sure MySQL is running and credentials are correct.');
+    log('Database connection: FAILED');
+    log(`   Error: ${error.message}`);
+    log('   Make sure MySQL is running and credentials are correct.');
   }
 
   // 2. Check Environment Variables
@@ -30,38 +44,37 @@ async function runStartupChecks() {
   
   if (missingEnvVars.length === 0) {
     checks.env = true;
-    console.log('✅ Environment variables: OK');
+    log('Environment variables: OK');
   } else {
-    console.warn('⚠️  Environment variables: Some missing');
-    console.warn(`   Missing: ${missingEnvVars.join(', ')}`);
-    console.warn('   Using defaults from .env or knexfile.js');
+    log('Environment variables: Some missing');
+    log(`   Missing: ${missingEnvVars.join(', ')}`);
+    log('   Using defaults from .env or knexfile.js');
   }
 
   // 3. Check Database Migrations
   if (checks.database) {
     try {
       const migrations = await db.migrate.list();
-      const pending = migrations[1]; // Pending migrations
+      const pending = migrations[1];
       
       if (pending && pending.length > 0) {
-        console.warn(`⚠️  Database migrations: ${pending.length} pending`);
-        console.warn('   Run: npm run migrate');
+        log(`Database migrations: ${pending.length} pending`);
+        log('   Run: npm run migrate');
       } else {
         checks.migrations = true;
-        console.log('✅ Database migrations: Up to date');
+        log('Database migrations: Up to date');
       }
     } catch (error) {
-      console.error('❌ Database migrations check: FAILED');
-      console.error(`   Error: ${error.message}`);
+      log('Database migrations check: FAILED');
+      log(`   Error: ${error.message}`);
     }
   }
 
   // 4. Check Email Configuration
   if (process.env.SMTP_HOST) {
     try {
-      // Just check if transporter can be created (doesn't send actual email)
       const nodemailer = require('nodemailer');
-      const transporter = nodemailer.createTransport({
+      nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587', 10),
         secure: process.env.SMTP_SECURE === 'true',
@@ -70,20 +83,19 @@ async function runStartupChecks() {
           pass: process.env.SMTP_PASS
         } : undefined
       });
-      
-      // Verify connection (async, but we'll just check config)
+
       checks.email = true;
-      console.log('✅ Email configuration: OK');
-      console.log(`   SMTP Host: ${process.env.SMTP_HOST}`);
+      log('Email configuration: OK');
+      log(`   SMTP Host: ${process.env.SMTP_HOST}`);
     } catch (error) {
-      console.warn('⚠️  Email configuration: Invalid');
-      console.warn(`   Error: ${error.message}`);
-      console.warn('   Email features will be disabled.');
+      log('Email configuration: Invalid');
+      log(`   Error: ${error.message}`);
+      log('   Email features will be disabled.');
     }
   } else {
-    console.warn('⚠️  Email configuration: Not configured');
-    console.warn('   Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in .env');
-    console.warn('   Email features will be disabled.');
+    log('Email configuration: Not configured');
+    log('   Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in .env');
+    log('   Email features will be disabled.');
   }
 
   // 5. Check if database has users
@@ -93,32 +105,31 @@ async function runStartupChecks() {
       const count = parseInt(userCount.count);
       
       if (count === 0) {
-        console.warn('⚠️  Database: No users found');
-        console.warn('   Run: npm run seed');
+        log('Database: No users found');
+        log('   Run: npm run seed');
       } else {
-        console.log(`✅ Database: ${count} user(s) found`);
+        log(`Database: ${count} user(s) found`);
       }
     } catch (error) {
-      console.warn('⚠️  Could not check user count');
+      log('Could not check user count');
     }
   }
 
   // Summary
-  console.log('\n📊 Startup Check Summary:');
-  console.log(`   Database: ${checks.database ? '✅' : '❌'}`);
-  console.log(`   Migrations: ${checks.migrations ? '✅' : '⚠️'}`);
-  console.log(`   Email: ${checks.email ? '✅' : '⚠️'}`);
-  console.log(`   Environment: ${checks.env ? '✅' : '⚠️'}`);
+  log('\nStartup Check Summary:');
+  log(`   Database: ${checks.database ? 'OK' : 'FAILED'}`);
+  log(`   Migrations: ${checks.migrations ? 'OK' : 'PENDING'}`);
+  log(`   Email: ${checks.email ? 'OK' : 'NOT READY'}`);
+  log(`   Environment: ${checks.env ? 'OK' : 'ISSUES'}`);
 
   if (!checks.database) {
-    console.error('\n❌ CRITICAL: Database connection failed. Server may not work properly.\n');
+    log('\nCRITICAL: Database connection failed. Server may not work properly.\n');
     process.exit(1);
   }
 
-  console.log('\nServer ready to start!\n');
+  log('\nServer ready to start!\n');
   
   return checks;
 }
 
 module.exports = { runStartupChecks };
-
