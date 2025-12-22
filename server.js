@@ -75,7 +75,7 @@ async function startServer() {
     await runStartupChecks();
 
   } catch (err) {
-
+      console.log(err);
       const log = `
         [${new Date().toISOString()}]
         Startup Error:
