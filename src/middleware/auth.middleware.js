@@ -18,7 +18,7 @@ const requireApiAuth = (req, res, next) => {
       throw new UnauthorizedError('No token provided');
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super-secret-jwt-token');
     req.user = decoded;
     next();
   } catch (error) {
@@ -35,7 +35,7 @@ const optionalApiAuth = (req, res, next) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     
     if (token) {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super-secret-jwt-token');
       req.user = decoded;
     }
     next();

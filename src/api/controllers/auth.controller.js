@@ -4,13 +4,14 @@ const { ValidationError, UnauthorizedError } = require('../../utils/errors');
 const { auditLog } = require('../../middleware/audit.middleware');
 
 const generateToken = (user) => {
+  
   return jwt.sign(
     { 
       id: user.id, 
       email: user.email, 
       role: user.role 
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'super-secret-jwt-token',
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 };
