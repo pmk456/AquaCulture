@@ -5,9 +5,36 @@
         <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
         </div>
-        <h1 class="text-2xl font-bold text-gray-800 mb-4"><%= title || 'An error occurred' %></h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2"><%= title || 'An error occurred' %></h1>
         <p class="text-gray-600 mb-6"><%= message || 'Something went wrong. Please try again later.' %></p>
-        <div class="flex flex-wrap justify-center gap-4">
+        
+        <% if (typeof error !== 'undefined' && error.stack) { %>
+            <div class="mt-8 text-left">
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h2 class="text-sm font-bold text-gray-700 uppercase mb-2 flex items-center">
+                        <i class="fas fa-bug mr-2 text-red-400"></i> Technical Diagnostics
+                    </h2>
+                    <div class="space-y-2">
+                        <div class="text-xs">
+                            <span class="font-bold text-gray-500">MESSAGE:</span>
+                            <span class="text-red-600 ml-1"><%= error.message %></span>
+                        </div>
+                        <% if (error.code) { %>
+                            <div class="text-xs">
+                                <span class="font-bold text-gray-500">CODE:</span>
+                                <span class="text-blue-600 ml-1"><%= error.code %></span>
+                            </div>
+                        <% } %>
+                        <div class="mt-4">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase">Stack Trace</span>
+                            <pre class="mt-1 p-3 bg-gray-900 text-gray-300 text-[10px] rounded overflow-x-auto leading-relaxed shadow-inner"><%= error.stack %></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="flex flex-wrap justify-center gap-4 mt-8">
             <a href="/dashboard" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 Go to Dashboard
             </a>

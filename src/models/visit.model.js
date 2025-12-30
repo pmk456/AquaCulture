@@ -29,8 +29,10 @@ const VisitModel = {
       .select(
         'visits.*',
         'dealers.name as dealer_name',
+        'dealers.address as dealer_address',
         'reps.first_name as rep_first_name',
-        'reps.last_name as rep_last_name'
+        'reps.last_name as rep_last_name',
+        'reps.email as rep_email'
       );
 
     if (filters.dealer_id) {
@@ -92,8 +94,10 @@ const VisitModel = {
       .select(
         'visits.*',
         'dealers.name as dealer_name',
+        'dealers.address as dealer_address',
         'reps.first_name as rep_first_name',
-        'reps.last_name as rep_last_name'
+        'reps.last_name as rep_last_name',
+        'reps.email as rep_email'
       )
       .orderBy('visits.start_time', 'desc')
       .limit(limit)
@@ -134,7 +138,8 @@ const VisitModel = {
   async getVisitsToday() {
     return db('visits')
       .whereRaw('DATE(start_time) = CURDATE()')
-      .count({ count: '*' });
+      .count({ count: '*' })
+      .first();
   }
 };
 

@@ -12,21 +12,21 @@ const errorHandler = (err, req, res, next) => {
         code: 'VALIDATION_ERROR'
       });
     }
-    
+
     if (err instanceof NotFoundError) {
       return res.status(404).json({
         error: err.message,
         code: 'NOT_FOUND'
       });
     }
-    
+
     if (err instanceof UnauthorizedError) {
       return res.status(401).json({
         error: err.message,
         code: 'UNAUTHORIZED'
       });
     }
-    
+
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({
         error: err.message,
@@ -45,25 +45,27 @@ const errorHandler = (err, req, res, next) => {
   // For admin routes, render error page or redirect
   if (err instanceof AppError) {
     if (err.statusCode === 404) {
-      return res.status(404).render('error', { 
+      return res.status(404).render('error', {
         title: 'Not Found',
         message: err.message,
-        user: req.session?.user 
+        user: req.session?.user
       });
     }
     if (err.statusCode === 403) {
-      return res.status(403).render('error', { 
+      return res.status(403).render('error', {
         title: 'Forbidden',
         message: err.message,
-        user: req.session?.user 
+        user: req.session?.user
       });
     }
   }
 
   // Default error page
-  res.status(500).render('error', {
-    title: 'Error',
-    message: 'An error occurred',
+  const isDev = process.env.NODE_ENV === 'development';
+  res.status(err.statusCode || 500).render('error', {
+    title: err.name || 'Error',
+    message: err.message || 'An unexpected error occurred',
+    error: isDev ? err : {}, // Pass actual error object in dev
     user: req.session?.user
   });
 };

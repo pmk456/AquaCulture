@@ -23,7 +23,7 @@ const DashboardService = {
     return {
       activeReps: parseInt(activeReps.count),
       pendingSyncs: parseInt(pendingSyncs.count),
-      visitsToday: parseInt(visitsToday.count || 0),
+      visitsToday: parseInt(visitsToday?.count || 0),
       territoriesCount: parseInt(territoriesCount.count)
     };
   },

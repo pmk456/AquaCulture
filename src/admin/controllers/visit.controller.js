@@ -42,11 +42,23 @@ const VisitController = {
   async showDetail(req, res, next) {
     try {
       const visit = await visitService.findById(req.params.id);
+      if (!visit) {
+        return res.status(404).render('error', {
+          title: 'Not Found',
+          message: 'Visit not found',
+          user: req.session.user
+        });
+      }
+
       let territory = null;
       if (visit.rep_id) {
-        const rep = await userService.findById(visit.rep_id);
-        if (rep && rep.territory_id) {
-          territory = await territoryService.findById(rep.territory_id);
+        try {
+          const rep = await userService.findById(visit.rep_id);
+          if (rep && rep.territory_id) {
+            territory = await territoryService.findById(rep.territory_id);
+          }
+        } catch (error) {
+          console.warn(`Could not fetch rep/territory info for visit ${visit.id}:`, error.message);
         }
       }
 
