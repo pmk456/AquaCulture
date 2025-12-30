@@ -54,7 +54,7 @@ const AuthController = {
       try {
         await sendMail({
           to: user.email,
-          subject: 'Your AquaCulture admin verification code',
+          subject: 'Your B.Tech AquaCulture admin verification code',
           text: `Your verification code is ${code}. It expires in 10 minutes.`,
           html: `<p>Your verification code is:</p><p style="font-size: 22px; font-weight: bold; letter-spacing: 4px;">${code}</p><p>This code expires in 10 minutes.</p>`
         });
@@ -146,7 +146,7 @@ const AuthController = {
         try {
           await sendMail({
             to: email,
-            subject: 'Reset your AquaCulture admin password',
+            subject: 'Reset your B.Tech AquaCulture admin password',
             text: `Open this link to reset your password: ${resetUrl}`,
             html: `<p>You requested a password reset.</p><p><a href="${resetUrl}">Click here to reset your password</a> (valid for 1 hour).</p>`
           });

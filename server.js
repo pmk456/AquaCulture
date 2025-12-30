@@ -18,10 +18,10 @@ app.use(cors({
 app.set('trust proxy', 1);
 app.use(session({
   secret: 'aquaculture-secret-key-change-in-production',
-  name: 'aquaculture.sid',
+  name: 'btech_aquaculture.sid',
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     secure: false,
     httpOnly: true,
     sameSite: 'lax',
@@ -78,17 +78,17 @@ async function startServer() {
     await runStartupChecks();
 
   } catch (err) {
-      console.log(err);
-      const log = `
+    console.log(err);
+    const log = `
         [${new Date().toISOString()}]
         Startup Error:
         ${err.stack || err}
         ${err.stack}
         ----------------------------------
         `;
-        // clear contents
-        fs.writeFileSync(logFile, '', 'utf8');
-        fs.writeFileSync(logFile, log, 'utf8');
+    // clear contents
+    fs.writeFileSync(logFile, '', 'utf8');
+    fs.writeFileSync(logFile, log, 'utf8');
   }
 }
 
@@ -99,5 +99,5 @@ startServer();
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

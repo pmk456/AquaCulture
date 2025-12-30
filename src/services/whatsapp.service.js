@@ -23,11 +23,11 @@ const WhatsAppService = {
       // - Twilio WhatsApp API
       // - WhatsApp Cloud API (Meta)
       // - WhatsApp Business API via third-party service
-      
+
       // Mock implementation - log the message
       console.log(`[WhatsApp Mock] Sending to ${user.first_name} ${user.last_name} (${user.email}):`);
       console.log(`[WhatsApp Mock] Message: ${message}`);
-      
+
       // In production, this would be:
       // const phoneNumber = user.phone_number; // Add phone_number field to users table
       // await twilioClient.messages.create({
@@ -57,11 +57,11 @@ const WhatsAppService = {
 
     const dealerName = visitData.dealer_name || 'Dealer';
     const visitId = visitData.id;
-    
+
     const message = `🎉 Sale Completed!\n\n` +
       `Congratulations ${user.first_name}! Your visit #${visitId} to ${dealerName} has been marked as a completed sale by your manager.\n\n` +
       `Keep up the great work! 💪\n\n` +
-      `View details in the AquaCulture Field app.`;
+      `View details in the B.Tech AquaCulture Field app.`;
 
     return await this.sendNotification(repId, message);
   },
@@ -81,10 +81,10 @@ const WhatsAppService = {
 
     const dealerName = visitData.dealer_name || 'Dealer';
     const visitId = visitData.id;
-    
+
     let message = '';
     let emoji = '';
-    
+
     switch (status) {
       case 'accepted':
         emoji = '✅';

@@ -9,7 +9,7 @@
 2. **Create a New Project** (or select existing)
    - Click on the project dropdown at the top
    - Click "New Project"
-   - Enter project name: "AquaCulture Admin"
+   - Enter project name: "B.Tech AquaCulture Admin"
    - Click "Create"
 
 3. **Enable Required APIs**

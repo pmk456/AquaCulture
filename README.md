@@ -1,4 +1,4 @@
-# AquaCulture CRM - Full Stack System
+# B.Tech AquaCulture CRM - Full Stack System
 
 A comprehensive CRM system with both Admin Dashboard (EJS SSR) and Mobile App API (JSON), built with clean architecture principles.
 
