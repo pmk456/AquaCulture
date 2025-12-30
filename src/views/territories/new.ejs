@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load existing polygon if editing
     <% if (formData && formData.polygon_coordinates) { %>
         try {
-            const existingCoords = JSON.parse('<%- JSON.stringify(formData.polygon_coordinates).replace(/'/g, "\\'") %>');
+            const existingCoords = <%- JSON.stringify(formData.polygon_coordinates) %>;
             setTimeout(() => {
                 map.loadPolygon(existingCoords);
             }, 1000);

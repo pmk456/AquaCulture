@@ -100,7 +100,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const existingPolygon = <% if (territory.polygon_coordinates) { %>
-        <%= JSON.stringify(territory.polygon_coordinates) %>
+        <%- JSON.stringify(territory.polygon_coordinates) %>
     <% } else { %>
         null
     <% } %>;

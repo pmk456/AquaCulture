@@ -132,6 +132,7 @@
             enableDrawing: false,
             existingPolygon: territory ? territory.polygon_coordinates : null
         });
+        map.init();
 
         // After map is ready, center and add a marker
         const initInterval = setInterval(() => {

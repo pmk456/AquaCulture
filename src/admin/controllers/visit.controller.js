@@ -4,6 +4,7 @@ const userService = require('../../services/user.service');
 const { auditLog } = require('../../middleware/audit.middleware');
 const territoryService = require('../../services/territory.service');
 const whatsappService = require('../../services/whatsapp.service');
+const trackingModel = require('../../models/tracking.model');
 
 const VisitController = {
   async list(req, res, next) {
@@ -16,10 +17,11 @@ const VisitController = {
         end_date: req.query.end_date
       };
 
-      const [visits, dealers, reps] = await Promise.all([
+      const [visits, dealers, reps, latestLocations] = await Promise.all([
         visitService.findAll(filters),
         dealerService.findAll({}),
-        userService.findAll({ role: 'rep', is_active: true })
+        userService.findAll({ role: 'rep', is_active: true }),
+        trackingModel.getLatestLocations()
       ]);
 
       res.render('visits/index', {
@@ -29,6 +31,7 @@ const VisitController = {
         visits,
         dealers,
         reps,
+        latestLocations,
         filters
       });
     } catch (error) {
@@ -47,13 +50,22 @@ const VisitController = {
         }
       }
 
+      let latestLocation = null;
+      if (!visit.end_time && visit.rep_id) {
+        const locations = await trackingModel.getLatestLocations({ user_id: visit.rep_id });
+        if (locations && locations.length > 0) {
+          latestLocation = locations[0];
+        }
+      }
+
       res.render('visits/detail', {
         title: 'Visit Details',
         currentPage: 'visits',
         user: req.session.user,
         visit,
         visitId: req.params.id,
-        territory
+        territory,
+        latestLocation
       });
     } catch (error) {
       next(error);
@@ -107,7 +119,7 @@ const VisitController = {
   async delete(req, res, next) {
     try {
       await visitService.delete(req.params.id);
-      
+
       await auditLog(req, 'delete', 'visit', req.params.id);
 
       res.json({ success: true });

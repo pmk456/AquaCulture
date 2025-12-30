@@ -47,6 +47,11 @@
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-<%= statusColor %>-100 text-<%= statusColor %>-700 capitalize">
                         <%= status %>
                     </span>
+                    <% if (!visit.end_time) { %>
+                        <span class="flex items-center text-xs font-bold text-red-600 animate-pulse ml-2">
+                            <span class="w-2 h-2 bg-red-600 rounded-full mr-1"></span> LIVE POSITION
+                        </span>
+                    <% } %>
                     <% if (visit.sale_completed) { %>
                         <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
                             🎉 Sale Completed
@@ -86,10 +91,10 @@
                     <p class="text-sm text-gray-600">Sales Rep</p>
                     <div class="flex items-center mt-1">
                         <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold mr-2">
-                            <%= visit.rep_first_name.charAt(0) %><%= visit.rep_last_name.charAt(0) %>
+                            <%= (visit.rep_first_name ? visit.rep_first_name.charAt(0) : '?') %><%= (visit.rep_last_name ? visit.rep_last_name.charAt(0) : '') %>
                         </div>
                         <div>
-                            <p class="text-gray-800 font-medium"><%= visit.rep_first_name %> <%= visit.rep_last_name %></p>
+                            <p class="text-gray-800 font-medium"><%= visit.rep_first_name || 'Unknown' %> <%= visit.rep_last_name || 'Rep' %></p>
                             <p class="text-xs text-gray-500"><%= visit.rep_role || 'Rep' %></p>
                         </div>
                     </div>
@@ -176,6 +181,12 @@ document.addEventListener('DOMContentLoaded', () => {
         null
     <% } %>;
 
+    const latestLocation = <% if (latestLocation) { %>
+        <%- JSON.stringify(latestLocation) %>
+    <% } else { %>
+        null
+    <% } %>;
+
     const mapUtil = new TerritoryMap('visit-map', {
         enableDrawing: false,
         existingPolygon: territory ? territory.polygon_coordinates : null,
@@ -197,6 +208,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 map: mapUtil.map,
                 label: 'S',
                 title: 'Start'
+            }));
+            path.push(pos);
+        }
+
+        if (latestLocation && !visit.end_time) {
+            const pos = { lat: latestLocation.latitude, lng: latestLocation.longitude };
+            markers.push(new google.maps.Marker({
+                position: pos,
+                map: mapUtil.map,
+                icon: {
+                    url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                    scaledSize: new google.maps.Size(40, 40)
+                },
+                title: 'Current Live Location',
+                zIndex: 1000
             }));
             path.push(pos);
         }

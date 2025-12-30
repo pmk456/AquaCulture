@@ -21,10 +21,18 @@ class TerritoryMap {
   }
 
   init() {
+    // Try to get API key from meta tag first, then fallback to hardcoded (if provided)
     const apiKey = 'AIzaSyCBeMKby4VT9fX_nOX22HlyPHs5wn-6QCg';
 
     // Load Google Maps script if not already loaded
     if (!window.google || !window.google.maps) {
+      // Check if another script is already loading
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+      if (existingScript) {
+        existingScript.onload = () => this.initMap();
+        return;
+      }
+
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=drawing,geometry,places`;
       script.async = true;
@@ -81,7 +89,7 @@ class TerritoryMap {
     // When a place is selected from autocomplete
     this.autocomplete.addListener('place_changed', () => {
       const place = this.autocomplete.getPlace();
-      
+
       if (!place.geometry) {
         console.error('No geometry found for place');
         return;
@@ -247,7 +255,7 @@ class TerritoryMap {
     try {
       // Parse coordinates if string
       const coords = typeof coordinates === 'string' ? JSON.parse(coordinates) : coordinates;
-      
+
       if (!Array.isArray(coords) || coords.length === 0) return;
 
       // Convert to Google Maps LatLng array
@@ -298,8 +306,8 @@ class TerritoryMap {
     if (!this.map || !territory.polygon_coordinates) return null;
 
     try {
-      const coords = typeof territory.polygon_coordinates === 'string' 
-        ? JSON.parse(territory.polygon_coordinates) 
+      const coords = typeof territory.polygon_coordinates === 'string'
+        ? JSON.parse(territory.polygon_coordinates)
         : territory.polygon_coordinates;
 
       if (!Array.isArray(coords) || coords.length === 0) return null;
@@ -374,34 +382,34 @@ class TerritoryMap {
       }
 
       const geocoder = new google.maps.Geocoder();
-      
+
       geocoder.geocode({ address: query }, (results, status) => {
         if (status === 'OK' && results && results.length > 0) {
           const location = results[0].geometry.location;
           const bounds = results[0].geometry.viewport;
-          
+
           // Center map on the location
           this.map.setCenter(location);
-          
+
           // If there's a viewport, fit to it; otherwise zoom to a reasonable level
           if (bounds) {
             this.map.fitBounds(bounds);
           } else {
             this.map.setZoom(15);
           }
-          
+
           // Add a marker at the searched location
           if (this.searchMarker) {
             this.searchMarker.setMap(null);
           }
-          
+
           this.searchMarker = new google.maps.Marker({
             position: location,
             map: this.map,
             title: results[0].formatted_address,
             animation: google.maps.Animation.DROP
           });
-          
+
           // Show info window with address
           const infoWindow = new google.maps.InfoWindow({
             content: `<div class="p-2">
@@ -409,14 +417,14 @@ class TerritoryMap {
               <p class="text-xs text-gray-600 mt-1">You can now draw your territory boundary from here.</p>
             </div>`
           });
-          
+
           infoWindow.open(this.map, this.searchMarker);
-          
+
           // Auto-close info window after 5 seconds
           setTimeout(() => {
             infoWindow.close();
           }, 5000);
-          
+
           resolve(location);
         } else {
           reject(new Error(`Geocoding failed: ${status}`));
