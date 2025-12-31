@@ -16,6 +16,7 @@ class TerritoryMap {
       onPolygonComplete: options.onPolygonComplete || null,
       onMarkerComplete: options.onMarkerComplete || null,
       onMarkerMove: options.onMarkerMove || null,
+      onLocationSelect: options.onLocationSelect || null,
       existingPolygon: options.existingPolygon || null
     };
   }
@@ -124,6 +125,15 @@ class TerritoryMap {
       });
 
       infoWindow.open(this.map, this.searchMarker);
+
+      // Trigger callback if provided
+      if (this.options.onLocationSelect) {
+        this.options.onLocationSelect({
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+          address: place.formatted_address || place.name
+        });
+      }
 
       // Auto-close info window after 5 seconds
       setTimeout(() => {
@@ -419,6 +429,15 @@ class TerritoryMap {
           });
 
           infoWindow.open(this.map, this.searchMarker);
+
+          // Trigger callback if provided
+          if (this.options.onLocationSelect) {
+            this.options.onLocationSelect({
+              lat: location.lat(),
+              lng: location.lng(),
+              address: results[0].formatted_address
+            });
+          }
 
           // Auto-close info window after 5 seconds
           setTimeout(() => {

@@ -235,6 +235,10 @@
                 onMarkerComplete: ({ lat, lng }) => {
                     latInput.value = lat.toFixed(6);
                     lngInput.value = lng.toFixed(6);
+                },
+                onLocationSelect: (coordinates) => {
+                    latInput.value = coordinates.lat.toFixed(6);
+                    lngInput.value = coordinates.lng.toFixed(6);
                 }
             };
 

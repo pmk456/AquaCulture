@@ -8,3 +8,4 @@ yarn-error.log*
 src/config/db.js
 src/config/mail.js
 knexfile.js
+reset.sh

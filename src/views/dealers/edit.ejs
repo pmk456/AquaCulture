@@ -208,6 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
         onMarkerMove: (coordinates) => {
             latInput.value = coordinates.lat;
             lngInput.value = coordinates.lng;
+        },
+        onLocationSelect: (coordinates) => {
+            latInput.value = coordinates.lat.toFixed(6);
+            lngInput.value = coordinates.lng.toFixed(6);
+            if (dealerMarker) {
+                dealerMarker.setPosition(coordinates);
+            }
         }
     });
 
