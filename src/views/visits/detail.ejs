@@ -182,7 +182,11 @@ document.addEventListener('DOMContentLoaded', () => {
     <% } %>;
 
     const latestLocation = <% if (latestLocation) { %>
-        <%- JSON.stringify(latestLocation) %>
+        <%- JSON.stringify({
+            ...latestLocation,
+            latitude: Number(latestLocation.latitude),
+            longitude: Number(latestLocation.longitude)
+        }) %>
     <% } else { %>
         null
     <% } %>;

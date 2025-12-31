@@ -111,7 +111,7 @@
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Location</span>
                                 <span class="text-gray-800 font-medium">
-                                    <%= loc.latitude && loc.longitude ? `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}` : 'N/A' %>
+                                    <%= loc.latitude && loc.longitude ? `${Number(loc.latitude).toFixed(4)}, ${Number(loc.longitude).toFixed(4)}` : 'N/A' %>
                                 </span>
                             </div>
                             <div class="flex justify-between">
@@ -135,7 +135,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const territories = <% if (typeof territories !== 'undefined' && territories.length > 0) { %>
-        <%= JSON.stringify(territories.map(t => ({
+        <%- JSON.stringify(territories.map(t => ({
             id: t.id,
             name: t.name,
             description: t.description,
@@ -146,12 +146,12 @@ document.addEventListener('DOMContentLoaded', () => {
     <% } %>;
 
     const locations = <% if (typeof locations !== 'undefined' && locations.length > 0) { %>
-        <%= JSON.stringify(locations.map(loc => ({
+        <%- JSON.stringify(locations.map(loc => ({
             user_id: loc.user_id,
             first_name: loc.first_name,
             last_name: loc.last_name,
-            latitude: loc.latitude,
-            longitude: loc.longitude,
+            latitude: Number(loc.latitude),
+            longitude: Number(loc.longitude),
             timestamp: loc.timestamp,
             role: loc.role
         }))) %>
