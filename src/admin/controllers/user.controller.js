@@ -12,13 +12,18 @@ const UserController = {
         search: req.query.search
       };
 
-      const users = await userService.findAll(filters);
+      const [users, territories] = await Promise.all([
+        userService.findAll(filters),
+        territoryService.findAll({ is_active: true })
+      ]);
 
       res.render('users/index', {
         title: 'Users',
         currentPage: 'users',
         user: req.session.user,
-        users
+        users,
+        territories,
+        filters
       });
     } catch (error) {
       next(error);

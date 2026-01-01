@@ -14,47 +14,66 @@
 
     <!-- Filters -->
     <div class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form id="filterForm" method="GET" action="/users" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                <input 
-                    type="text" 
-                    id="searchInput"
-                    placeholder="Search users..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        name="search"
+                        id="searchInput"
+                        placeholder="Search users..."
+                        value="<%= filters?.search || '' %>"
+                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                    <div class="absolute left-3 top-2.5 text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                <select id="roleFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="role" onchange="this.form.submit()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">All Roles</option>
-                    <option value="super_admin">Super Admin</option>
-                    <option value="manager">Manager</option>
-                    <option value="rep">Rep</option>
+                    <option value="super_admin" <%= filters?.role === 'super_admin' ? 'selected' : '' %>>Super Admin</option>
+                    <option value="manager" <%= filters?.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                    <option value="rep" <%= filters?.role === 'rep' ? 'selected' : '' %>>Rep</option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select id="statusFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="status" onchange="this.form.submit()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active" <%= filters?.is_active === true ? 'selected' : '' %>>Active</option>
+                    <option value="inactive" <%= filters?.is_active === false ? 'selected' : '' %>>Inactive</option>
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Territory</label>
-                <select id="territoryFilter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select name="territory_id" onchange="this.form.submit()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">All Territories</option>
-                    <option value="1">North Region</option>
-                    <option value="2">South Region</option>
-                    <option value="3">East Region</option>
+                    <% if (typeof territories !== 'undefined' && territories.length) { %>
+                        <% territories.forEach(t => { %>
+                            <option value="<%= t.id %>" <%= filters?.territory_id == t.id ? 'selected' : '' %>><%= t.name %></option>
+                        <% }) %>
+                    <% } %>
                 </select>
             </div>
-        </div>
+        </form>
     </div>
 
-    <!-- Users Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <!-- View Toggle -->
+    <div class="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg w-fit">
+        <button id="tableViewBtn" class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-white shadow-sm text-blue-600">
+            <i class="fas fa-list mr-2"></i>Table
+        </button>
+        <button id="cardViewBtn" class="px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-600 hover:text-gray-800">
+            <i class="fas fa-th-large mr-2"></i>Cards
+        </button>
+    </div>
+
+    <!-- Users Table View -->
+    <div id="tableView" class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
             <table id="usersTable" class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -71,7 +90,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     <% if (typeof users !== 'undefined' && users.length > 0) { %>
                         <% users.forEach(u => { %>
-                            <tr class="table-row">
+                            <tr class="table-row searchable-item" data-search-text="<%= u.first_name %> <%= u.last_name %> <%= u.email %> <%= u.role %>">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold mr-3">
@@ -106,7 +125,7 @@
                                     <a href="/users/<%= u.id %>/edit" class="text-blue-600 hover:text-blue-900 mr-4">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button onclick="deactivateUser(<%= u.id %>)" class="text-red-600 hover:text-red-900">
+                                    <button onclick="deactivateUser(<%= u.id %>)" class="text-red-600 hover:text-red-900 <%= !u.is_active ? 'opacity-50 cursor-not-allowed' : '' %>" <%= !u.is_active ? 'disabled' : '' %>>
                                         <i class="fas fa-ban"></i>
                                     </button>
                                 </td>
@@ -121,17 +140,160 @@
             </table>
         </div>
     </div>
+
+    <!-- Users Card View (Hidden by default) -->
+    <div id="cardView" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% if (typeof users !== 'undefined' && users.length > 0) { %>
+            <% users.forEach(u => { %>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all group searchable-item" data-search-text="<%= u.first_name %> <%= u.last_name %> <%= u.email %> <%= u.role %>">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-lg mr-4 border-2 border-white shadow-sm">
+                                    <%= (u.first_name ? u.first_name.charAt(0) : '') + (u.last_name ? u.last_name.charAt(0) : '') %>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900 text-lg"><%= u.first_name %> <%= u.last_name %></h3>
+                                    <p class="text-sm text-gray-500"><%= u.email %></p>
+                                </div>
+                            </div>
+                            <span class="status-badge <%= u.is_active ? 'status-active' : 'status-inactive' %>">
+                                <%= u.is_active ? 'Active' : 'Inactive' %>
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-gray-50 p-2 rounded-lg">
+                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Role</p>
+                                <p class="text-sm font-semibold text-gray-700 capitalize"><%= u.role.replace('_', ' ') %></p>
+                            </div>
+                            <div class="bg-gray-50 p-2 rounded-lg">
+                                <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Territory</p>
+                                <p class="text-sm font-semibold text-gray-700"><%= u.territory_name || 'Global' %></p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center text-xs text-gray-500 mb-6">
+                            <i class="far fa-clock mr-2"></i>
+                            Last login: <%= u.last_login ? new Date(u.last_login).toLocaleDateString() : 'Never' %>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                            <span class="text-xs text-gray-400">ID: #<%= u.id %></span>
+                            <div class="flex space-x-2">
+                                <a href="/users/<%= u.id %>/edit" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button onclick="deactivateUser(<%= u.id %>)" 
+                                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors <%= !u.is_active ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                        title="Deactivate User"
+                                        <%= !u.is_active ? 'disabled' : '' %>>
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="col-span-full py-12 text-center bg-white rounded-xl shadow-sm border border-gray-100">
+                <i class="fas fa-users-slash text-gray-300 text-4xl mb-4"></i>
+                <p class="text-gray-500">No users found.</p>
+            </div>
+        <% } %>
+    </div>
 </div>
 
 <script>
-function deactivateUser(userId) {
-    if (utils.confirmAction('Are you sure you want to deactivate this user?')) {
-        utils.showToast('User deactivated successfully', 'success');
+async function deactivateUser(userId) {
+    if (confirm('Are you sure you want to deactivate this user?')) {
+        try {
+            const response = await fetch(`/users/${userId}/deactivate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            if (result.success) {
+                if (typeof utils !== 'undefined') {
+                    utils.showToast('User deactivated successfully', 'success');
+                } else {
+                    alert('User deactivated successfully');
+                }
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                throw new Error(result.error || 'Failed to deactivate user');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            if (typeof utils !== 'undefined') {
+                utils.showToast(error.message, 'error');
+            } else {
+                alert(error.message);
+            }
+        }
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    initTableFilter('usersTable', 'searchInput');
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const cardViewBtn = document.getElementById('cardViewBtn');
+    const tableView = document.getElementById('tableView');
+    const cardView = document.getElementById('cardView');
+    const searchInput = document.getElementById('searchInput');
+
+    function setView(mode) {
+        if (mode === 'card') {
+            tableView.classList.add('hidden');
+            cardView.classList.remove('hidden');
+            cardView.classList.add('grid');
+            
+            cardViewBtn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+            cardViewBtn.classList.remove('text-gray-600');
+            
+            tableViewBtn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+            tableViewBtn.classList.add('text-gray-600');
+            
+            localStorage.setItem('users_view_mode', 'card');
+        } else {
+            cardView.classList.add('hidden');
+            cardView.classList.remove('grid');
+            tableView.classList.remove('hidden');
+            
+            tableViewBtn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
+            tableViewBtn.classList.remove('text-gray-600');
+            
+            cardViewBtn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+            cardViewBtn.classList.add('text-gray-600');
+            
+            localStorage.setItem('users_view_mode', 'table');
+        }
+    }
+
+    tableViewBtn.addEventListener('click', () => setView('table'));
+    cardViewBtn.addEventListener('click', () => setView('card'));
+
+    // Load saved preference
+    const savedMode = localStorage.getItem('users_view_mode');
+    if (savedMode === 'card') setView('card');
+
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const filter = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.searchable-item');
+            
+            items.forEach(item => {
+                const text = item.getAttribute('data-search-text').toLowerCase();
+                if (text.includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
 });
 </script>
 
